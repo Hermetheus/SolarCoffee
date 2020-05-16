@@ -1,0 +1,25 @@
+[user]
+email = allanmolson@gmail.com
+name = hermetheus
+
+[color]
+diff = auto
+status = auto
+ui = auto
+
+[color "diff"]
+meta = yellow bold
+frag = magenta bold # line info
+old = red # deletions
+new = green # addtions
+
+[alias]
+pm = "!git push -u origin master"
+c = commit -m
+co = checkout
+a = add -A
+st = status
+pu = push
+
+[push]
+default = simple
