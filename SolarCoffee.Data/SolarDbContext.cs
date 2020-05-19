@@ -4,19 +4,19 @@ using SolarCoffee.Data.Models;
 
 namespace SolarCoffee.Data
 {
-    class SolarDbContext: IdentityDbContext
+    public class SolarDbContext : IdentityDbContext
     {
         public SolarDbContext()
         {
-
         }
+
         public SolarDbContext(DbContextOptions options) : base(options)
         {
-         
         }
+
         public virtual DbSet<Customer> Customers { get; set; }
+
         public virtual DbSet<CustomerAddress> CustomerAddresses
         { get; set; }
-
     }
 }
