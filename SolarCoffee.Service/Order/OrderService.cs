@@ -83,9 +83,44 @@ namespace SolarCoffee.Service.Order
             }
         }
 
+        /// <summary>
+        /// Marks an open order as Paid
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ServiceResponse<bool> MarkFulfilled(int id)
         {
-            throw new NotImplementedException();
+            var now = DateTime.UtcNow;
+
+            var order = _db.SalesOrders.Find(id);
+
+            order.UpdatedOn = now;
+
+            order.IsPaid = true;
+
+            try
+            {
+                _db.SalesOrders.Update(order);
+                _db.SaveChanges();
+
+                return new ServiceResponse<bool>
+                {
+                    IsSuccess = true,
+                    Data = true,
+                    Message = $"Order {order.Id} closed: Invoice paid in full",
+                    Time = now
+                };
+            }
+            catch (Exception e)
+            {
+                return new ServiceResponse<bool>
+                {
+                    IsSuccess = false,
+                    Data = false,
+                    Message = e.StackTrace,
+                    Time = now
+                };
+            }
         }
     }
 }
