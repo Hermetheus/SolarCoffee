@@ -10,8 +10,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
 import SideMenu from "@/components/SideMenu.vue";
+import { Component, Vue } from "vue-property-decorator";
 
 @Component({
   name: "App",

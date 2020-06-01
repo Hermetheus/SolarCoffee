@@ -49,61 +49,92 @@
       </tr>
     </table>
 
-    <new-product-modal v-if="isNewProductVisible"></new-product-modal>
-    <shipment-modal v-if="isShipmentVisible"></shipment-modal>
+    <new-product-modal
+      v-if="isNewProductVisible"
+      @save:product="saveNewProduct"
+      @close="closeModals"
+    ></new-product-modal>
+    <shipment-modal
+      v-if="isShipmentVisible"
+      @save:shipment="saveNewShipment"
+      :inventory="inventory"
+      @close="closeModals"
+    ></shipment-modal>
   </div>
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
-  import { ProductInventory } from '../types/Product';
-  import SolarButton from '../components/SolarButton.vue';
+import { Component, Vue } from "vue-property-decorator";
+import { ProductInventory, Product } from "../types/Product";
+import SolarButton from "../components/SolarButton.vue";
+import NewProductModal from "../components/Modals/NewProductModal.vue";
+import ShipmentModal from "../components/Modals/ShipmentModal.vue";
+import { Shipment } from "../types/Shipment";
 
-  @Component({
-    name: 'Inventory',
-    components: { SolarButton },
-  })
-  export default class Inventory extends Vue {
-    isNewProductVisible = false;
-    isShipmentVisible = false;
+@Component({
+  name: "Inventory",
+  components: { SolarButton, NewProductModal, ShipmentModal }
+})
+export default class Inventory extends Vue {
+  isNewProductVisible = false;
+  isShipmentVisible = false;
 
-    inventory: ProductInventory[] = [
-      {
+  inventory: ProductInventory[] = [
+    {
+      id: 1,
+      product: {
         id: 1,
-        product: {
-          id: 1,
-          name: 'Some Product',
-          description: 'Good Stuff',
-          price: 100,
-          createdOn: new Date(),
-          updatedOn: new Date(),
-          isTaxable: true,
-          isArchived: false,
-        },
-        quantityOnHand: 100,
-        idealQuantity: 100,
+        name: "Some Product",
+        description: "Good Stuff",
+        price: 100,
+        createdOn: new Date(),
+        updatedOn: new Date(),
+        isTaxable: true,
+        isArchived: false
       },
-      {
+      quantityOnHand: 100,
+      idealQuantity: 100
+    },
+    {
+      id: 2,
+      product: {
         id: 2,
-        product: {
-          id: 2,
-          name: 'Another Product',
-          description: 'Good Stuff',
-          price: 100,
-          createdOn: new Date(),
-          updatedOn: new Date(),
-          isTaxable: false,
-          isArchived: false,
-        },
-        quantityOnHand: 40,
-        idealQuantity: 20,
+        name: "Another Product",
+        description: "Good Stuff",
+        price: 100,
+        createdOn: new Date(),
+        updatedOn: new Date(),
+        isTaxable: false,
+        isArchived: false
       },
-    ];
+      quantityOnHand: 40,
+      idealQuantity: 20
+    }
+  ];
 
-    showNewProductModal() {}
-
-    showShipmentModal() {}
+  closeModals() {
+    this.isShipmentVisible = false;
+    this.isNewProductVisible = false;
   }
+
+  saveNewProduct(product: Product) {
+    console.log("saveNewProduct");
+    console.log(product);
+  }
+
+  saveNewShipment(shipment: Shipment) {
+    console.log("saveNewShipment");
+    console.log(shipment);
+  }
+
+  showNewProductModal() {
+    this.isNewProductVisible = true;
+  }
+
+  showShipmentModal() {
+    this.isShipmentVisible = true;
+  }
+}
 </script>
 
 <style lang="scss" scoped></style>
