@@ -50,6 +50,15 @@ namespace SolarCoffee.Web
 
             app.UseRouting();
 
+            app.UseCors(builder =>
+                builder.WithOrigins(
+                    "http://localhost:8080",
+                    "http://localhost:8081",
+                    "http://localhost:8082")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin());
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

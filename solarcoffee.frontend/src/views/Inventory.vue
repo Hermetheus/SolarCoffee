@@ -64,77 +64,88 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { ProductInventory, Product } from "../types/Product";
-import SolarButton from "../components/SolarButton.vue";
-import NewProductModal from "../components/Modals/NewProductModal.vue";
-import ShipmentModal from "../components/Modals/ShipmentModal.vue";
-import { Shipment } from "../types/Shipment";
+  import { Component, Vue } from 'vue-property-decorator';
+  import { ProductInventory, Product } from '../types/Product';
+  import SolarButton from '../components/SolarButton.vue';
+  import NewProductModal from '../components/Modals/NewProductModal.vue';
+  import ShipmentModal from '../components/Modals/ShipmentModal.vue';
+  import { Shipment } from '../types/Shipment';
+  import { InventoryService } from '../services/inventory-service';
 
-@Component({
-  name: "Inventory",
-  components: { SolarButton, NewProductModal, ShipmentModal }
-})
-export default class Inventory extends Vue {
-  isNewProductVisible = false;
-  isShipmentVisible = false;
+  const inventoryService = new InventoryService();
 
-  inventory: ProductInventory[] = [
-    {
-      id: 1,
-      product: {
+  @Component({
+    name: 'Inventory',
+    components: { SolarButton, NewProductModal, ShipmentModal },
+  })
+  export default class Inventory extends Vue {
+    isNewProductVisible = false;
+    isShipmentVisible = false;
+
+    inventory: ProductInventory[] = [
+      {
         id: 1,
-        name: "Some Product",
-        description: "Good Stuff",
-        price: 100,
-        createdOn: new Date(),
-        updatedOn: new Date(),
-        isTaxable: true,
-        isArchived: false
+        product: {
+          id: 1,
+          name: 'Some Product',
+          description: 'Good Stuff',
+          price: 100,
+          createdOn: new Date(),
+          updatedOn: new Date(),
+          isTaxable: true,
+          isArchived: false,
+        },
+        quantityOnHand: 100,
+        idealQuantity: 100,
       },
-      quantityOnHand: 100,
-      idealQuantity: 100
-    },
-    {
-      id: 2,
-      product: {
+      {
         id: 2,
-        name: "Another Product",
-        description: "Good Stuff",
-        price: 100,
-        createdOn: new Date(),
-        updatedOn: new Date(),
-        isTaxable: false,
-        isArchived: false
+        product: {
+          id: 2,
+          name: 'Another Product',
+          description: 'Good Stuff',
+          price: 100,
+          createdOn: new Date(),
+          updatedOn: new Date(),
+          isTaxable: false,
+          isArchived: false,
+        },
+        quantityOnHand: 40,
+        idealQuantity: 20,
       },
-      quantityOnHand: 40,
-      idealQuantity: 20
+    ];
+
+    closeModals() {
+      this.isShipmentVisible = false;
+      this.isNewProductVisible = false;
     }
-  ];
 
-  closeModals() {
-    this.isShipmentVisible = false;
-    this.isNewProductVisible = false;
-  }
+    saveNewProduct(product: Product) {
+      console.log('saveNewProduct');
+      console.log(product);
+    }
 
-  saveNewProduct(product: Product) {
-    console.log("saveNewProduct");
-    console.log(product);
-  }
+    saveNewShipment(shipment: Shipment) {
+      console.log('saveNewShipment');
+      console.log(shipment);
+    }
 
-  saveNewShipment(shipment: Shipment) {
-    console.log("saveNewShipment");
-    console.log(shipment);
-  }
+    showNewProductModal() {
+      this.isNewProductVisible = true;
+    }
 
-  showNewProductModal() {
-    this.isNewProductVisible = true;
-  }
+    showShipmentModal() {
+      this.isShipmentVisible = true;
+    }
 
-  showShipmentModal() {
-    this.isShipmentVisible = true;
+    async initialize() {
+      this.inventory = await inventoryService.getInventory();
+    }
+
+    async created() {
+      await this.initialize();
+    }
   }
-}
 </script>
 
 <style lang="scss" scoped></style>
