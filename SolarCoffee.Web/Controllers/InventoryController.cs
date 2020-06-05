@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SolarCoffee.Service.Inventory;
 using SolarCoffee.Web.Serialization;
 using SolarCoffee.Web.ViewModels;
+using System.Linq;
 
 namespace SolarCoffee.Web.Controllers
 {
@@ -41,6 +41,10 @@ namespace SolarCoffee.Web.Controllers
         [HttpPatch("/api/inventory")]
         public ActionResult UpdateInventory([FromBody] ShipmentModel shipment)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             _logger.LogInformation($"Updating Inventory for {shipment.ProductId} - " + $"Adjustment: {shipment.Adjustment}");
 
             var id = shipment.ProductId;
