@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { Product } from './../types/Product.d';
+import axios from "axios";
+import { Product } from "./../types/Product.d";
 
 // Product Service, Provides UI business logic associated with products
 

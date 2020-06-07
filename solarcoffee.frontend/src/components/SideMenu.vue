@@ -1,7 +1,11 @@
 <template>
   <div class="side-menu-container">
     <router-link to="/">
-      <img src="../assets/logo.png" alt="SolarCoffee Logo" id="imgLogo" />
+      <img
+        src="../assets/solar_coffee_logo.png"
+        alt="SolarCoffee Logo"
+        id="imgLogo"
+      />
     </router-link>
     <h1>Management Portal</h1>
     <solar-button

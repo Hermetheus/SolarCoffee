@@ -1,6 +1,6 @@
-import { Customer } from '@/types/Customer';
-import Axios from 'axios';
-import { ServiceResponse } from './../types/ServiceResponse.d';
+import { Customer } from "@/types/Customer";
+import Axios from "axios";
+import { ServiceResponse } from "./../types/ServiceResponse.d";
 
 export default class CustomerService {
   API_URL = process.env.VUE_APP_API_URL;

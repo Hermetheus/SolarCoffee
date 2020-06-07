@@ -19,14 +19,14 @@
         <th>Since</th>
         <th>Delete</th>
       </tr>
-      <tr v-for="customer in customers">
+      <tr v-for="customer in customers" :key="customer.id">
         <td>
-          {{ customer.firstName + ' ' + customer.lastName }}
+          {{ customer.firstName + " " + customer.lastName }}
         </td>
         <td>
           {{
             customer.primaryAddress.addressLine1 +
-              ' ' +
+              " " +
               customer.primaryAddress.addressLine2
           }}
         </td>
@@ -54,67 +54,67 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
-  import SolarButton from '../components/SolarButton.vue';
-  import { Customer } from '../types/Customer';
-  import CustomerService from '../services/customer-service';
-  import NewCustomerModal from '../components/Modals/NewCustomerModal.vue';
+import { Component, Vue } from "vue-property-decorator";
+import SolarButton from "../components/SolarButton.vue";
+import { Customer } from "../types/Customer";
+import CustomerService from "../services/customer-service";
+import NewCustomerModal from "../components/Modals/NewCustomerModal.vue";
 
-  const customerService = new CustomerService();
+const customerService = new CustomerService();
 
-  @Component({
-    name: 'Customers',
-    components: { SolarButton, NewCustomerModal },
-  })
-  export default class Customers extends Vue {
-    customers: Customer[] = [];
-    isCustomerModalVisible: boolean = false;
+@Component({
+  name: "Customers",
+  components: { SolarButton, NewCustomerModal }
+})
+export default class Customers extends Vue {
+  customers: Customer[] = [];
+  isCustomerModalVisible = false;
 
-    showNewCustomerModal() {
-      this.isCustomerModalVisible = true;
-    }
-
-    closeModal() {
-      this.isCustomerModalVisible = false;
-    }
-
-    async initialize() {
-      const res = await customerService.getCustomers();
-      this.customers = res;
-    }
-
-    async created() {
-      await this.initialize();
-    }
-
-    async saveNewCustomer(newCustomer: Customer) {
-      await customerService.addCustomer(newCustomer);
-      this.isCustomerModalVisible = false;
-      await this.initialize();
-    }
-
-    async deleteCustomer(id: number) {
-      await customerService.deleteCustomer(id);
-      await this.initialize();
-    }
+  showNewCustomerModal() {
+    this.isCustomerModalVisible = true;
   }
+
+  closeModal() {
+    this.isCustomerModalVisible = false;
+  }
+
+  async initialize() {
+    const res = await customerService.getCustomers();
+    this.customers = res;
+  }
+
+  async created() {
+    await this.initialize();
+  }
+
+  async saveNewCustomer(newCustomer: Customer) {
+    await customerService.addCustomer(newCustomer);
+    this.isCustomerModalVisible = false;
+    await this.initialize();
+  }
+
+  async deleteCustomer(id: number) {
+    await customerService.deleteCustomer(id);
+    await this.initialize();
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-  @import '@/scss/global.scss';
-  .customer-actions {
-    display: flex;
-    margin-bottom: 0.8rem;
+@import "@/scss/global.scss";
+.customer-actions {
+  display: flex;
+  margin-bottom: 0.8rem;
 
-    div {
-      margin-right: 0.8rem;
-    }
+  div {
+    margin-right: 0.8rem;
   }
+}
 
-  .customer-delete {
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: $solar-red;
-  }
+.customer-delete {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: $solar-red;
+}
 </style>
