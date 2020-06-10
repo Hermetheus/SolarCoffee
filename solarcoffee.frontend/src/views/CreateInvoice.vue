@@ -15,7 +15,7 @@
         >
           <option disabled value="">Please select a Customer</option>
           <option v-for="c in customers" :value="c.id" :key="c.id">{{
-            c.firstName + ' ' + c.lastName
+            c.firstName + " " + c.lastName
           }}</option>
         </select>
       </div>
@@ -104,7 +104,7 @@
                 Customer:
                 {{
                   this.selectedCustomer.firstName +
-                    ' ' +
+                    " " +
                     this.selectedCustomer.lastName
                 }}
               </h3>
@@ -175,178 +175,178 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from "vue-property-decorator";
 
-  import SolarButton from '@/components/SolarButton.vue';
-  // noinspection TypeScriptCheckImport
-  import jsPDF from 'jspdf';
-  import html2canvas from 'html2canvas';
-  import { InventoryService } from '../services/inventory-service';
-  import CustomerService from '../services/customer-service';
-  import InvoiceService from '../services/invoice-service';
-  import { Invoice, LineItem } from '../types/Invoice';
-  import { Customer } from '../types/Customer';
-  import { ProductInventory } from '../types/Product';
-  const customerService = new CustomerService();
-  const inventoryService = new InventoryService();
-  const invoiceService = new InvoiceService();
-  @Component({ name: 'CreateInvoice', components: { SolarButton } })
-  export default class CreateInvoice extends Vue {
-    invoiceStep = 1;
-    invoice: Invoice = {
+import SolarButton from "@/components/SolarButton.vue";
+// noinspection TypeScriptCheckImport
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { InventoryService } from "../services/inventory-service";
+import CustomerService from "../services/customer-service";
+import InvoiceService from "../services/invoice-service";
+import { Invoice, LineItem } from "../types/Invoice";
+import { Customer } from "../types/Customer";
+import { ProductInventory } from "../types/Product";
+const customerService = new CustomerService();
+const inventoryService = new InventoryService();
+const invoiceService = new InvoiceService();
+@Component({ name: "CreateInvoice", components: { SolarButton } })
+export default class CreateInvoice extends Vue {
+  invoiceStep = 1;
+  invoice: Invoice = {
+    customerId: 0,
+    lineItems: [],
+    createdOn: new Date(),
+    updatedOn: new Date()
+  };
+  customers: Customer[] = [];
+  selectedCustomerId = 0;
+  inventory: ProductInventory[] = [];
+  lineItems: LineItem[] = [];
+  newItem: LineItem = { product: undefined, quantity: 0 };
+  get canGoNext() {
+    if (this.invoiceStep === 1) {
+      return this.selectedCustomerId !== 0;
+    }
+    if (this.invoiceStep === 2) {
+      return this.lineItems.length;
+    }
+    if (this.invoiceStep === 3) {
+      return false;
+    }
+    return false;
+  }
+  get canGoPrev() {
+    return this.invoiceStep !== 1;
+  }
+  get runningTotal() {
+    return this.lineItems.reduce(
+      (a, b) => a + b["product"]["price"] * b["quantity"],
+      0
+    );
+  }
+  get selectedCustomer() {
+    return this.customers.find(c => c.id == this.selectedCustomerId);
+  }
+  async submitInvoice(): Promise<void> {
+    this.invoice = {
+      customerId: this.selectedCustomerId,
+      lineItems: this.lineItems,
+      createdOn: new Date(),
+      updatedOn: new Date()
+    };
+    await invoiceService.makeNewInvoice(this.invoice);
+    this.downloadPdf();
+    await this.$router.push("/orders");
+  }
+  downloadPdf() {
+    const pdf = new jsPDF("p", "pt", "a4", true);
+    const invoice = document.getElementById("invoice");
+    const width = this.$refs.invoice.clientWidth;
+    const height = this.$refs.invoice.clientHeight;
+    html2canvas(invoice).then(canvas => {
+      const image = canvas.toDataURL("image/png");
+      pdf.addImage(image, "PNG", 0, 0, width * 0.55, height * 0.55);
+      pdf.save("invoice");
+    });
+  }
+  addLineItem() {
+    const newItem: LineItem = {
+      product: this.newItem.product,
+      quantity: Number(this.newItem.quantity)
+    };
+    const existingItems = this.lineItems.map(item => item.product.id);
+    if (existingItems.includes(newItem.product.id)) {
+      const lineItem = this.lineItems.find(
+        item => item.product.id === newItem.product.id
+      );
+      let currentQuantity = Number(lineItem.quantity);
+      const updatedQuantity = (currentQuantity += newItem.quantity);
+      lineItem.quantity = updatedQuantity;
+    } else {
+      this.lineItems.push(this.newItem);
+    }
+    this.newItem = { product: undefined, quantity: 0 };
+  }
+  startOver(): void {
+    this.invoice = {
       customerId: 0,
       lineItems: [],
       createdOn: new Date(),
-      updatedOn: new Date(),
+      updatedOn: new Date()
     };
-    customers: Customer[] = [];
-    selectedCustomerId = 0;
-    inventory: ProductInventory[] = [];
-    lineItems: LineItem[] = [];
-    newItem: LineItem = { product: undefined, quantity: 0 };
-    get canGoNext() {
-      if (this.invoiceStep === 1) {
-        return this.selectedCustomerId !== 0;
-      }
-      if (this.invoiceStep === 2) {
-        return this.lineItems.length;
-      }
-      if (this.invoiceStep === 3) {
-        return false;
-      }
-      return false;
-    }
-    get canGoPrev() {
-      return this.invoiceStep !== 1;
-    }
-    get runningTotal() {
-      return this.lineItems.reduce(
-        (a, b) => a + b['product']['price'] * b['quantity'],
-        0
-      );
-    }
-    get selectedCustomer() {
-      return this.customers.find((c) => c.id == this.selectedCustomerId);
-    }
-    async submitInvoice(): Promise<void> {
-      this.invoice = {
-        customerId: this.selectedCustomerId,
-        lineItems: this.lineItems,
-        createdOn: new Date(),
-        updatedOn: new Date(),
-      };
-      await invoiceService.makeNewInvoice(this.invoice);
-      this.downloadPdf();
-      await this.$router.push('/orders');
-    }
-    downloadPdf() {
-      const pdf = new jsPDF('p', 'pt', 'a4', true);
-      const invoice = document.getElementById('invoice');
-      const width = this.$refs.invoice.clientWidth;
-      const height = this.$refs.invoice.clientHeight;
-      html2canvas(invoice).then((canvas) => {
-        const image = canvas.toDataURL('image/png');
-        pdf.addImage(image, 'PNG', 0, 0, width * 0.55, height * 0.55);
-        pdf.save('invoice');
-      });
-    }
-    addLineItem() {
-      const newItem: LineItem = {
-        product: this.newItem.product,
-        quantity: Number(this.newItem.quantity),
-      };
-      const existingItems = this.lineItems.map((item) => item.product.id);
-      if (existingItems.includes(newItem.product.id)) {
-        const lineItem = this.lineItems.find(
-          (item) => item.product.id === newItem.product.id
-        );
-        let currentQuantity = Number(lineItem.quantity);
-        const updatedQuantity = (currentQuantity += newItem.quantity);
-        lineItem.quantity = updatedQuantity;
-      } else {
-        this.lineItems.push(this.newItem);
-      }
-      this.newItem = { product: undefined, quantity: 0 };
-    }
-    startOver(): void {
-      this.invoice = {
-        customerId: 0,
-        lineItems: [],
-        createdOn: new Date(),
-        updatedOn: new Date(),
-      };
-      this.invoiceStep = 1;
-    }
-    finalizeOrder() {
-      this.invoiceStep = 3;
-    }
-    prev(): void {
-      if (this.invoiceStep === 1) {
-        return;
-      }
-      this.invoiceStep -= 1;
-    }
-    next(): void {
-      if (this.invoiceStep === 3) {
-        return;
-      }
-      this.invoiceStep += 1;
-    }
-    async initialize(): Promise<void> {
-      this.customers = await customerService.getCustomers();
-      this.inventory = await inventoryService.getInventory();
-    }
-    async created() {
-      await this.initialize();
-    }
+    this.invoiceStep = 1;
   }
+  finalizeOrder() {
+    this.invoiceStep = 3;
+  }
+  prev(): void {
+    if (this.invoiceStep === 1) {
+      return;
+    }
+    this.invoiceStep -= 1;
+  }
+  next(): void {
+    if (this.invoiceStep === 3) {
+      return;
+    }
+    this.invoiceStep += 1;
+  }
+  async initialize(): Promise<void> {
+    this.customers = await customerService.getCustomers();
+    this.inventory = await inventoryService.getInventory();
+  }
+  async created() {
+    await this.initialize();
+  }
+}
 </script>
 
 <style scoped lang="scss">
-  @import '@/scss/global.scss';
-  .invoice-steps-actions {
+@import "@/scss/global.scss";
+.invoice-steps-actions {
+  display: flex;
+  width: 100%;
+}
+.invoice-step {
+}
+.invoice-step-detail {
+  margin: 1.2rem;
+}
+.invoice-order-list {
+  margin-top: 1.2rem;
+  padding: 0.8rem;
+  .line-item {
     display: flex;
-    width: 100%;
-  }
-  .invoice-step {
-  }
-  .invoice-step-detail {
-    margin: 1.2rem;
-  }
-  .invoice-order-list {
-    margin-top: 1.2rem;
+    border-bottom: 1px dashed #ccc;
     padding: 0.8rem;
-    .line-item {
-      display: flex;
-      border-bottom: 1px dashed #ccc;
-      padding: 0.8rem;
-    }
-    .item-col {
-      flex-grow: 1;
-    }
   }
-  .invoice-item-actions {
-    display: flex;
+  .item-col {
+    flex-grow: 1;
   }
-  .price-pre-tax {
-    font-weight: bold;
+}
+.invoice-item-actions {
+  display: flex;
+}
+.price-pre-tax {
+  font-weight: bold;
+}
+.price-final {
+  font-weight: bold;
+  color: $solar-green;
+}
+.due {
+  font-weight: bold;
+}
+.invoice-header {
+  width: 100%;
+  margin-bottom: 1.2rem;
+}
+.invoice-logo {
+  padding-top: 1.4rem;
+  text-align: center;
+  img {
+    width: 280px;
   }
-  .price-final {
-    font-weight: bold;
-    color: $solar-green;
-  }
-  .due {
-    font-weight: bold;
-  }
-  .invoice-header {
-    width: 100%;
-    margin-bottom: 1.2rem;
-  }
-  .invoice-logo {
-    padding-top: 1.4rem;
-    text-align: center;
-    img {
-      width: 280px;
-    }
-  }
+}
 </style>

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SolarCoffee.Data.Models;
+using SolarCoffee.Web.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SolarCoffee.Data.Models;
-using SolarCoffee.Web.ViewModels;
 
 namespace SolarCoffee.Web.Serialization
 {
@@ -12,7 +12,7 @@ namespace SolarCoffee.Web.Serialization
     public static class OrderMapper
     {
         /// <summary>
-        /// Map an Invoicemodel view model to a SalesOrder data Model
+        /// Map an Invoice model view model to a SalesOrder data Model
         /// </summary>
         /// <param name="invoice"></param>
         /// <returns></returns>
