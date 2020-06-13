@@ -8,8 +8,7 @@ using System.Linq;
 namespace SolarCoffee.Web.Controllers
 {
     [ApiController]
-    public class
-        ProductController : ControllerBase
+    public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
         private readonly IProductService _productService;
@@ -20,29 +19,8 @@ namespace SolarCoffee.Web.Controllers
             _productService = productService;
         }
 
-        [HttpGet("/api/product")]
-        public ActionResult GetProduct()
-        {
-            _logger.LogInformation("Getting all products");
-            var products = _productService.GetAllProducts();
-
-            // var productViewModels = products.Select(product => ProductMapper.SerializeProductModel((product)));
-
-            var productViewModels = products.Select(ProductMapper.SerializeProductModel);
-
-            return Ok(productViewModels);
-        }
-
-        [HttpPatch("/api/product/{id}")]
-        public ActionResult ArchiveProduct(int id)
-        {
-            _logger.LogInformation("Archiving product");
-            var archiveResult = _productService.ArchiveProduct(id);
-            return Ok(archiveResult);
-        }
-
         /// <summary>
-        /// Adds a new Product
+        /// Adds a new product
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
@@ -53,10 +31,37 @@ namespace SolarCoffee.Web.Controllers
             {
                 return BadRequest(ModelState);
             }
-            _logger.LogInformation("Adding Product");
+            _logger.LogInformation("Adding product");
             var newProduct = ProductMapper.SerializeProductModel(product);
             var newProductResponse = _productService.CreateProduct(newProduct);
             return Ok(newProductResponse);
+        }
+
+        /// <summary>
+        /// Returns all products
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/api/product")]
+        public ActionResult GetProduct()
+        {
+            _logger.LogInformation("Getting all products");
+            var products = _productService.GetAllProducts();
+            var productViewModels = products
+                .Select(ProductMapper.SerializeProductModel);
+            return Ok(productViewModels);
+        }
+
+        /// <summary>
+        /// Archives an existing product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPatch("/api/product/{id}")]
+        public ActionResult ArchiveProduct(int id)
+        {
+            _logger.LogInformation("Archiving product");
+            var archiveResult = _productService.ArchiveProduct(id);
+            return Ok(archiveResult);
         }
     }
 }

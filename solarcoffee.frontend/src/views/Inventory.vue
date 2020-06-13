@@ -1,23 +1,25 @@
 <template>
   <div class="inventory-container">
     <h1 id="inventoryTitle">
-      Inventory Data
+      Inventory Dashboard
     </h1>
     <hr />
 
+    <inventory-chart />
+
     <div class="inventory-actions">
-      <solar-button @button:click="showNewProductModal" id="addNewBtn"
-        >Add New Item
+      <solar-button @button:click="showNewProductModal" id="addNewBtn">
+        Add New Item
       </solar-button>
-      <solar-button @button:click="showShipmentModal" id="receiveShipmentBtn"
-        >Receive Shipment
+      <solar-button @button:click="showShipmentModal" id="receiveShipmentBtn">
+        Receive Shipment
       </solar-button>
     </div>
 
     <table id="inventoryTable" class="table">
       <tr>
         <th>Item</th>
-        <th>Quantity On-Hand</th>
+        <th>Quantity On-hand</th>
         <th>Unit Price</th>
         <th>Taxable</th>
         <th>Delete</th>
@@ -37,14 +39,14 @@
         <td>
           {{ item.product.price | price }}
         </td>
-
         <td>
           <span v-if="item.product.isTaxable">
             Yes
           </span>
-          <span v-else>No</span>
+          <span v-else>
+            No
+          </span>
         </td>
-
         <td>
           <div
             class="lni lni-cross-circle product-archive"
@@ -58,147 +60,121 @@
       v-if="isNewProductVisible"
       @save:product="saveNewProduct"
       @close="closeModals"
-    ></new-product-modal>
+    />
+
     <shipment-modal
       v-if="isShipmentVisible"
-      @save:shipment="saveNewShipment"
       :inventory="inventory"
+      @save:shipment="saveNewShipment"
       @close="closeModals"
-    ></shipment-modal>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { ProductInventory, Product } from "../types/Product";
-import SolarButton from "../components/SolarButton.vue";
-import NewProductModal from "../components/Modals/NewProductModal.vue";
-import ShipmentModal from "../components/Modals/ShipmentModal.vue";
-import { Shipment } from "../types/Shipment";
-import { InventoryService } from "../services/inventory-service";
-import { ProductService } from "../services/product-service";
+  import { Component, Vue } from 'vue-property-decorator';
+  import { Product, ProductInventory } from '../types/Product';
+  import { Shipment } from '../types/Shipment';
+  import { InventoryService } from '../services/inventory-service';
+  import { ProductService } from '../services/product-service';
+  import SolarButton from '../components/SolarButton.vue';
+  import NewProductModal from '../components/Modals/NewProductModal.vue';
+  import ShipmentModal from '../components/Modals/ShipmentModal.vue';
+  import InventoryChart from '../components/charts/InventoryCharts.vue';
 
-const inventoryService = new InventoryService();
-const productService = new ProductService();
+  const inventoryService = new InventoryService();
+  const productService = new ProductService();
 
-@Component({
-  name: "Inventory",
-  components: { SolarButton, NewProductModal, ShipmentModal }
-})
-export default class Inventory extends Vue {
-  isNewProductVisible = false;
-  isShipmentVisible = false;
+  @Component({
+    name: 'Inventory',
+    components: { SolarButton, NewProductModal, ShipmentModal, InventoryChart },
+  })
+  export default class Inventory extends Vue {
+    isNewProductVisible = false;
+    isShipmentVisible = false;
 
-  inventory: ProductInventory[] = [
-    {
-      id: 1,
-      product: {
-        id: 1,
-        name: "Some Product",
-        description: "Good Stuff",
-        price: 100,
-        createdOn: new Date(),
-        updatedOn: new Date(),
-        isTaxable: true,
-        isArchived: false
-      },
-      quantityOnHand: 100,
-      idealQuantity: 100
-    },
-    {
-      id: 2,
-      product: {
-        id: 2,
-        name: "Another Product",
-        description: "Good Stuff",
-        price: 100,
-        createdOn: new Date(),
-        updatedOn: new Date(),
-        isTaxable: false,
-        isArchived: false
-      },
-      quantityOnHand: 40,
-      idealQuantity: 20
+    inventory: ProductInventory[] = [];
+
+    async archiveProduct(productId: number) {
+      await productService.archive(productId);
+      await this.initialize();
     }
-  ];
 
-  closeModals() {
-    this.isShipmentVisible = false;
-    this.isNewProductVisible = false;
-  }
-
-  async saveNewProduct(newProduct: Product) {
-    await productService.save(newProduct);
-    this.isNewProductVisible = false;
-    await this.initialize();
-  }
-
-  async saveNewShipment(shipment: Shipment) {
-    await inventoryService.updateInventoryQuantity(shipment);
-    this.isShipmentVisible = false;
-    await this.initialize();
-  }
-
-  showNewProductModal() {
-    this.isNewProductVisible = true;
-  }
-
-  showShipmentModal() {
-    this.isShipmentVisible = true;
-  }
-
-  async initialize() {
-    this.inventory = await inventoryService.getInventory();
-  }
-
-  async created() {
-    await this.initialize();
-  }
-
-  async archiveProduct(productId: number) {
-    await productService.archive(productId);
-    await this.initialize();
-  }
-
-  applyColor(current: number, target: number) {
-    if (current <= 0) {
-      return "red";
+    async saveNewProduct(newProduct: Product) {
+      await productService.save(newProduct);
+      this.isNewProductVisible = false;
+      await this.initialize();
     }
-    if (Math.abs(target - current) > 8) {
-      return "yellow";
+
+    applyColor(current: number, target: number) {
+      if (current <= 0) {
+        return 'red';
+      }
+
+      if (Math.abs(target - current) > 8) {
+        return 'yellow';
+      }
+
+      return 'green';
     }
-    return "green";
+
+    closeModals() {
+      this.isShipmentVisible = false;
+      this.isNewProductVisible = false;
+    }
+
+    showNewProductModal() {
+      this.isNewProductVisible = true;
+    }
+
+    showShipmentModal() {
+      this.isShipmentVisible = true;
+    }
+
+    async saveNewShipment(shipment: Shipment) {
+      await inventoryService.updateInventoryQuantity(shipment);
+      this.isShipmentVisible = false;
+      await this.initialize();
+    }
+
+    async initialize() {
+      this.inventory = await inventoryService.getInventory();
+      await this.$store.dispatch('assignSnapshots');
+    }
+
+    async created() {
+      await this.initialize();
+    }
   }
-}
 </script>
 
-<style lang="scss" scoped>
-@import "@/scss/global.scss";
+<style scoped lang="scss">
+  @import '@/scss/global.scss';
 
-.green {
-  font-weight: bold;
-  color: $solar-green;
-}
+  .green {
+    font-weight: bold;
+    color: $solar-green;
+  }
 
-.yellow {
-  font-weight: bold;
-  color: $solar-yellow;
-}
+  .yellow {
+    font-weight: bold;
+    color: $solar-yellow;
+  }
 
-.red {
-  font-weight: bold;
-  color: $solar-red;
-}
+  .red {
+    font-weight: bold;
+    color: $solar-red;
+  }
 
-.inventory-actions {
-  display: flex;
-  margin-bottom: 0.8rem;
-}
+  .inventory-actions {
+    display: flex;
+    margin-bottom: 0.8rem;
+  }
 
-.product-archive {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: $solar-red;
-}
+  .product-archive {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: $solar-red;
+  }
 </style>

@@ -10,6 +10,8 @@ using SolarCoffee.Service.Customer;
 using SolarCoffee.Service.Inventory;
 using SolarCoffee.Service.Order;
 using SolarCoffee.Service.Product;
+using SolarCoffee.Services.Inventory;
+using SolarCoffee.Services.Product;
 
 namespace SolarCoffee.Web
 {
@@ -25,20 +27,22 @@ namespace SolarCoffee.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
-                .AddNewtonsoftJson(opts =>
-                {
-                    opts.SerializerSettings.ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                    };
-                });
+            services.AddCors();
 
-            services.AddDbContext<SolarDbContext>(opts =>
+            services.AddControllers().AddNewtonsoftJson(opts =>
             {
-                opts.EnableDetailedErrors();
-                opts.UseNpgsql(Configuration.GetConnectionString("solar.dev"));
+                opts.SerializerSettings.ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                };
             });
+
+            services.AddDbContext<SolarDbContext>(
+                opts =>
+                {
+                    opts.EnableDetailedErrors();
+                    opts.UseNpgsql(Configuration.GetConnectionString("solar.dev"));
+                });
 
             services.AddTransient<IProductService, ProductService>();
             services.AddTransient<ICustomerService, CustomerService>();
@@ -49,23 +53,22 @@ namespace SolarCoffee.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) { app.UseDeveloperExceptionPage(); }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseCors(builder =>
-                builder.WithOrigins(
-                    "http://localhost:8080",
-                    "http://localhost:8081",
-                    "http://localhost:8082")
-                    .AllowAnyHeader()
+            app.UseCors(
+                builder => builder
+                    .WithOrigins(
+                        "http://localhost:8080",
+                        "http://localhost:8081",
+                        "http://localhost:8082")
                     .AllowAnyMethod()
-                    .AllowAnyOrigin());
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                );
 
             app.UseAuthorization();
 
