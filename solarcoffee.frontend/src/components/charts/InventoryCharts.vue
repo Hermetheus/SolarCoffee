@@ -11,50 +11,57 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { InventoryTimeline } from "../../types/InventoryGraph";
-import { Get, Sync } from "vuex-pathify";
-import moment from "moment";
-// noinspection TypeScriptCheckImport
-import VueApexCharts from "vue-apexcharts";
-Vue.component("apexchart", VueApexCharts);
-@Component({
-  name: "InventoryChart",
-  components: {}
-})
-export default class InventoryChart extends Vue {
-  @Sync("snapshotTimeline")
-  snapshotTimeline: InventoryTimeline;
+  import { Component, Vue } from 'vue-property-decorator';
+  import { InventoryTimeline } from '../../types/InventoryGraph';
+  import { Get, Sync } from 'vuex-pathify';
 
-  @Get("isTimelineBuilt")
-  isTimelineBuilt: boolean;
+  import moment from 'moment';
 
-  get options() {
-    return {
-      dataLabels: { enabled: false },
-      fill: {
-        type: "gradient"
-      },
-      stroke: {
-        curve: "smooth"
-      },
-      xaxis: {
-        categories: this.snapshotTimeline.timeline,
-        type: "datetime"
-      }
-    };
-  }
+  // noinspection TypeScriptCheckImport
+  import VueApexCharts from 'vue-apexcharts';
+  Vue.component('apexchart', VueApexCharts);
 
-  get series() {
-    return this.snapshotTimeline.productInventorySnapshots.map(snapshot => ({
-      name: snapshot.productId,
-      data: snapshot.quantityOnHand
-    }));
+  @Component({
+    name: 'InventoryChart',
+    components: {},
+  })
+  export default class InventoryChart extends Vue {
+    @Sync('snapshotTimeline')
+    snapshotTimeline: InventoryTimeline;
+
+    @Get('isTimelineBuilt')
+    isTimelineBuilt: boolean;
+
+    get options() {
+      console.log(this.snapshotTimeline);
+      return {
+        dataLabels: { enabled: false },
+        fill: {
+          type: 'gradient',
+        },
+        stroke: {
+          curve: 'smooth',
+        },
+        xaxis: {
+          categories: this.snapshotTimeline.timeline,
+          type: 'datetime',
+        },
+      };
+    }
+
+    get series() {
+      return this.snapshotTimeline.productInventorySnapshots.map(
+        (snapshot) => ({
+          name: snapshot.productId,
+          data: snapshot.quantityOnHand,
+        })
+      );
+    }
+
+    async created() {
+      await this.$store.dispatch('assignSnapshots');
+    }
   }
-  async created() {
-    await this.$store.dispatch("assignSnapshots");
-  }
-}
 </script>
 
 <style scoped lang="scss"></style>

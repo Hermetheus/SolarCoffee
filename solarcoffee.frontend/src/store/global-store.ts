@@ -1,11 +1,11 @@
-import { make } from "vuex-pathify";
-import { InventoryService } from "./../services/inventory-service";
-import { InventoryTimeline } from "./../types/InventoryGraph.d";
+import { make } from 'vuex-pathify';
+import { InventoryService } from './../services/inventory-service';
+import { InventoryTimeline } from './../types/InventoryGraph';
 
 class GlobalStore {
-  snapShotTimeline: InventoryTimeline = {
+  snapshotTimeline: InventoryTimeline = {
     productInventorySnapshots: [],
-    timeline: []
+    timeline: [],
   };
 
   isTimelineBuilt = false;
@@ -16,18 +16,21 @@ const state = new GlobalStore();
 const mutations = make.mutations(state);
 
 const actions = {
-  async assignSnapshots({ commit }) {
+  //--noImplicitAny
+  async assignSnapshots({ commit }: { commit: any }) {
     const inventoryService = new InventoryService();
     const res = await inventoryService.getSnapshotHistory();
-
+    console.log(res);
     const timeline: InventoryTimeline = {
       productInventorySnapshots: res.productInventorySnapshots,
-      timeline: res.timeline
+      timeline: res.timeline,
     };
 
-    commit("SET_SNAPSHOT_TIMELINE", timeline);
-    commit("SET_IS_TIMELINE_BUILT", true);
-  }
+    console.log(timeline, 'timeline');
+
+    commit('SET_SNAPSHOT_TIMELINE', timeline);
+    commit('SET_IS_TIMELINE_BUILT', true);
+  },
 };
 
 const getters = {};
@@ -36,5 +39,5 @@ export default {
   state,
   mutations,
   actions,
-  getters
+  getters,
 };
